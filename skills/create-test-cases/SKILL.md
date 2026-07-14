@@ -84,6 +84,8 @@ Después de los PRECONDs, continúan los **pasos de ejecución** numerados secue
 4. Clic en el botón 'Guardar'|Se presenta mensaje de éxito 'Pedido creado correctamente' y se redirige a la lista de pedidos
 ```
 
+> ⚠️ **EXPECTED RESULT de PRECOND:** Todas las filas PRECOND deben tener Expected Result vacío visual — en formato texto plano (como arriba) se escribe solo `|` sin contenido después, y en XML se escribe `<BR/>` o `&lt;BR/&gt;`. Solo los pasos de validación/ejecución llevan Expected Result con contenido.
+
 **Ejemplo — TC deps + Datos + Login (tres PRECONDs):**
 ```
 1. PRECOND 0: TC-A (ID XXXX) ejecutado hasta el paso 10; el sistema muestra la pantalla de resultados|
@@ -144,7 +146,7 @@ Ejemplos reales:
 
 ### 4.1 Formato de resultados esperados largos — legibilidad con listas
 
-Cuando un resultado esperado incluye **3 o más elementos observables** (pantallas, mensajes, campos, estados), usar listas con viñetas (`-`) en lugar de texto corrido. Esto mejora la legibilidad y facilita la ejecución.
+Cuando un resultado esperado incluye **2 o más elementos observables** (pantallas, mensajes, campos, estados), usar listas con viñetas (`-`) en lugar de texto corrido. Esto mejora la legibilidad y facilita la ejecución.
 
 **❌ Mal (difícil de leer):**
 ```
@@ -177,8 +179,8 @@ Tras hacer clic en 'Iniciar Sesión':
 ```
 
 **Regla práctica:**
-- **1-2 elementos observables** → texto corrido simple
-- **3+ elementos observables** → lista con viñetas
+- **1 elemento observable** → texto corrido simple
+- **2+ elementos observables** → lista con viñetas
 - **Elementos agrupados** (ej. varios campos en una sección) → listas anidadas con indentación
 
 ---
