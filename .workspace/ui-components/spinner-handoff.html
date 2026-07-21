@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantify — AppSpinner · Design Handoff</title>
+  <style>
+    :root {
+      --blue:        #1B6CB2;
+      --blue-light:  #4AA3E8;
+      --blue-track:  #D6E4F7;
+      --orange:      #F5A520;
+      --bg:          #F0F5FC;
+      --surface:     #FFFFFF;
+      --dark-bg:     #111C2A;
+      --dark-surface:#1B2A3B;
+      --dark-track:  #1E3A5F;
+      --text:        #1A2B3C;
+      --text-muted:  #6B7C93;
+      --border:      #E2EAF4;
+      --radius:      16px;
+      --radius-sm:   8px;
+      --shadow:      0 2px 16px rgba(27,108,178,.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── Layout ─────────────────────────────────── */
+    .page { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+
+    /* ── Header ─────────────────────────────────── */
+    .header {
+      display: flex; align-items: center; gap: 16px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--border);
+    }
+    .header-logo {
+      width: 48px; height: 48px;
+      background: var(--blue);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .header-logo svg { width: 30px; height: 30px; }
+    .header-text h1 { font-size: 1.4rem; font-weight: 700; color: var(--blue); }
+    .header-text p  { font-size: .85rem; color: var(--text-muted); margin-top: 2px; }
+    .badge {
+      margin-left: auto;
+      padding: 4px 12px;
+      background: #E8F3FF;
+      color: var(--blue);
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    /* ── Section ─────────────────────────────────── */
+    .section-title {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Card ────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Spinner grid ────────────────────────────── */
+    .spinner-grid {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      padding: 24px 0;
+    }
+    .spinner-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .spinner-label {
+      font-size: .72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .spinner-px {
+      font-size: .68rem;
+      color: #B0BEC8;
+    }
+
+    /* Dark strip */
+    .dark-strip {
+      background: var(--dark-surface);
+      border-radius: var(--radius);
+      padding: 36px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+      flex-wrap: wrap;
+    }
+    .dark-strip .spinner-label { color: #8AA3BE; }
+    .dark-strip .spinner-px    { color: #4A6078; }
+
+    /* ── Color swatches ──────────────────────────── */
+    .swatches { display: flex; gap: 16px; flex-wrap: wrap; }
+    .swatch {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .swatch-block {
+      width: 72px; height: 56px;
+      border-radius: var(--radius-sm);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+    }
+    .swatch-name { font-size: .72rem; font-weight: 600; color: var(--text); }
+    .swatch-hex  { font-size: .7rem;  color: var(--text-muted); font-family: 'SF Mono', 'Fira Code', monospace; }
+    .swatch-role { font-size: .68rem; color: #B0BEC8; }
+
+    /* ── Tokens table ────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .85rem;
+    }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 2px solid var(--border);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    td code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .8rem;
+      background: #EEF3FA;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--blue);
+    }
+    .dot {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border-radius: 3px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    /* ── Code block ──────────────────────────────── */
+    .code-wrap {
+      background: #0F1923;
+      border-radius: var(--radius-sm);
+      padding: 20px 22px;
+      overflow-x: auto;
+    }
+    .code-wrap pre {
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: .78rem;
+      line-height: 1.7;
+      color: #C9D9EE;
+      white-space: pre;
+    }
+    .t-tpl  { color: #7EC8E3; }
+    .t-tag  { color: #7EC8E3; }
+    .t-attr { color: #F5A520; }
+    .t-val  { color: #A8D8A8; }
+    .t-cmt  { color: #4A6078; font-style: italic; }
+
+    /* ── Anim spec ───────────────────────────────── */
+    .anim-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .anim-row:last-child { border-bottom: none; }
+    .anim-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .anim-name  { font-weight: 600; font-size: .88rem; }
+    .anim-desc  { font-size: .78rem; color: var(--text-muted); margin-top: 2px; }
+    .anim-value { margin-left: auto; font-family: monospace; font-size: .78rem; color: var(--blue); background: #EEF3FA; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
+
+    /* ── Usage chips ─────────────────────────────── */
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .usage-chip {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .usage-chip-icon { font-size: 1.2rem; }
+    .usage-chip-text { font-size: .82rem; color: var(--text); }
+
+    /* ── Footer ──────────────────────────────────── */
+    .footer {
+      text-align: center;
+      font-size: .75rem;
+      color: var(--text-muted);
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+    .footer strong { color: var(--blue); }
+
+    /* ── Spinner CSS ──────────────────────────────── */
+    .qs { display: inline-flex; }
+    .qs svg { display: block; overflow: visible; }
+    .qs--sm  svg { width: 24px;  height: 24px;  }
+    .qs--md  svg { width: 40px;  height: 40px;  }
+    .qs--lg  svg { width: 64px;  height: 64px;  }
+    .qs--xl  svg { width: 96px;  height: 96px;  }
+    .qs--xxl svg { width: 128px; height: 128px; }
+
+    .q-arc { transform-origin: 50px 50px; animation: q-spin 1.1s linear infinite; }
+    .q-sq-a { animation: q-pulse 1.5s ease-in-out infinite; }
+    .q-sq-b { animation: q-pulse 1.5s ease-in-out infinite .45s; }
+
+    @keyframes q-spin  { to { transform: rotate(360deg); } }
+    @keyframes q-pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="40" stroke="#fff" stroke-width="18" stroke-dasharray="251.3" stroke-dashoffset="70"/>
+        <rect x="55" y="55" width="20" height="20" rx="3" fill="#F5A520"/>
+        <rect x="76" y="76" width="14" height="14" rx="2" fill="#F5A520" opacity=".6"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>AppSpinner</h1>
+      <p>Quantify 2.0 · Componente de carga de marca</p>
+    </div>
+    <span class="badge">Design Handoff</span>
+  </header>
+
+  <!-- LIVE PREVIEW — LIGHT -->
+  <div>
+    <p class="section-title">Preview — Light</p>
+    <div class="card">
+      <div class="spinner-grid">
+        <div class="spinner-item">
+          <div class="qs qs--sm">
+            <svg viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="40" stroke="#D6E4F7" stroke-width="9"/>
+              <circle class="q-arc" cx="50" cy="50" r="40" stroke="#1B6CB2" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+              <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+              <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+            </svg>
+          </div>
+          <span class="spinner-label">sm</span>
+          <span class="spinner-px">24 px</span>
+        </div>
+        <div class="spinner-item">
+          <div class="qs qs--md">
+            <svg viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="40" stroke="#D6E4F7" stroke-width="9"/>
+              <circle class="q-arc" cx="50" cy="50" r="40" stroke="#1B6CB2" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+              <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+              <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+            </svg>
+          </div>
+          <span class="spinner-label">md</span>
+          <span class="spinner-px">40 px</span>
+        </div>
+        <div class="spinner-item">
+          <div class="qs qs--lg">
+            <svg viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="40" stroke="#D6E4F7" stroke-width="9"/>
+              <circle class="q-arc" cx="50" cy="50" r="40" stroke="#1B6CB2" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+              <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+              <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+            </svg>
+          </div>
+          <span class="spinner-label">lg</span>
+          <span class="spinner-px">64 px</span>
+        </div>
+        <div class="spinner-item">
+          <div class="qs qs--xl">
+            <svg viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="40" stroke="#D6E4F7" stroke-width="9"/>
+              <circle class="q-arc" cx="50" cy="50" r="40" stroke="#1B6CB2" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+              <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+              <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+            </svg>
+          </div>
+          <span class="spinner-label">xl</span>
+          <span class="spinner-px">96 px</span>
+        </div>
+        <div class="spinner-item">
+          <div class="qs qs--xxl">
+            <svg viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="40" stroke="#D6E4F7" stroke-width="9"/>
+              <circle class="q-arc" cx="50" cy="50" r="40" stroke="#1B6CB2" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+              <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+              <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+            </svg>
+          </div>
+          <span class="spinner-label">xxl</span>
+          <span class="spinner-px">128 px</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE PREVIEW — DARK -->
+  <div>
+    <p class="section-title">Preview — Dark</p>
+    <div class="dark-strip">
+      <div class="spinner-item">
+        <div class="qs qs--md">
+          <svg viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="40" stroke="#1E3A5F" stroke-width="9"/>
+            <circle class="q-arc" cx="50" cy="50" r="40" stroke="#4AA3E8" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+            <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+            <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+          </svg>
+        </div>
+        <span class="spinner-label">md · dark</span>
+      </div>
+      <div class="spinner-item">
+        <div class="qs qs--lg">
+          <svg viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="40" stroke="#1E3A5F" stroke-width="9"/>
+            <circle class="q-arc" cx="50" cy="50" r="40" stroke="#4AA3E8" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+            <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+            <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+          </svg>
+        </div>
+        <span class="spinner-label">lg · dark</span>
+      </div>
+      <div class="spinner-item">
+        <div class="qs qs--xl">
+          <svg viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="40" stroke="#1E3A5F" stroke-width="9"/>
+            <circle class="q-arc" cx="50" cy="50" r="40" stroke="#4AA3E8" stroke-width="9" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="62.8"/>
+            <rect class="q-sq-a" x="55" y="55" width="14" height="14" rx="2.5" fill="#F5A520"/>
+            <rect class="q-sq-b" x="70" y="70" width="10" height="10" rx="2.5" fill="#F5A520"/>
+          </svg>
+        </div>
+        <span class="spinner-label">xl · dark</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESIGN TOKENS — COLORS -->
+  <div>
+    <p class="section-title">Colores</p>
+    <div class="card">
+      <div class="swatches">
+        <div class="swatch">
+          <div class="swatch-block" style="background:#1B6CB2;"></div>
+          <span class="swatch-name">Blue</span>
+          <span class="swatch-hex">#1B6CB2</span>
+          <span class="swatch-role">Arco — light</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#4AA3E8;"></div>
+          <span class="swatch-name">Blue Light</span>
+          <span class="swatch-hex">#4AA3E8</span>
+          <span class="swatch-role">Arco — dark mode</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#D6E4F7; border: 1px solid #C8D8EE;"></div>
+          <span class="swatch-name">Track Light</span>
+          <span class="swatch-hex">#D6E4F7</span>
+          <span class="swatch-role">Anillo de fondo — light</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#1E3A5F;"></div>
+          <span class="swatch-name">Track Dark</span>
+          <span class="swatch-hex">#1E3A5F</span>
+          <span class="swatch-role">Anillo de fondo — dark</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-block" style="background:#F5A520;"></div>
+          <span class="swatch-name">Orange</span>
+          <span class="swatch-hex">#F5A520</span>
+          <span class="swatch-role">Cuadrados acento</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESIGN TOKENS — SIZES & ANATOMY -->
+  <div>
+    <p class="section-title">Tokens de tamaño y anatomía</p>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Valor</th>
+            <th>Descripción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><code>size-sm</code></td><td>24 px</td><td>Inline en botones, inputs</td></tr>
+          <tr><td><code>size-md</code></td><td>40 px</td><td>Carga de sección pequeña</td></tr>
+          <tr><td><code>size-lg</code></td><td>64 px</td><td>Carga de panel o card</td></tr>
+          <tr><td><code>size-xl</code></td><td>96 px</td><td>Pantalla completa / overlay</td></tr>
+          <tr><td><code>size-xxl</code></td><td>128 px</td><td>Splash screen inicial</td></tr>
+          <tr><td><code>arc-coverage</code></td><td>270° (¾)</td><td>Longitud visible del arco</td></tr>
+          <tr><td><code>stroke-weight</code></td><td>9 / 100 u</td><td>Grosor relativo al viewBox</td></tr>
+          <tr><td><code>sq-a-size</code></td><td>14 × 14 u</td><td>Cuadrado principal (naranja)</td></tr>
+          <tr><td><code>sq-b-size</code></td><td>10 × 10 u</td><td>Cuadrado secundario (naranja)</td></tr>
+          <tr><td><code>sq-radius</code></td><td>2.5 u</td><td>Border-radius de los cuadrados</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ANIMATION SPEC -->
+  <div>
+    <p class="section-title">Especificaciones de animación</p>
+    <div class="card">
+      <div class="anim-row">
+        <div class="anim-icon" style="background:#EEF5FF;">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="#1B6CB2" stroke-width="2.5" stroke-dasharray="22" stroke-dashoffset="5.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="anim-name">Rotación del arco</div>
+          <div class="anim-desc">El anillo azul gira 360° de forma continua y uniforme</div>
+        </div>
+        <span class="anim-value">1.1s · linear · infinite</span>
+      </div>
+      <div class="anim-row">
+        <div class="anim-icon" style="background:#FFF4E6;">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" fill="#F5A520"/>
+            <rect x="13" y="13" width="6" height="6" rx="1" fill="#F5A520" opacity=".5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="anim-name">Pulso cuadrado A (principal)</div>
+          <div class="anim-desc">Fade-in/out suave — opacidad 100% → 30% → 100%</div>
+        </div>
+        <span class="anim-value">1.5s · ease-in-out · infinite · delay 0s</span>
+      </div>
+      <div class="anim-row">
+        <div class="anim-icon" style="background:#FFF4E6;">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="4" y="4" width="8" height="8" rx="1.5" fill="#F5A520" opacity=".5"/>
+            <rect x="13" y="13" width="6" height="6" rx="1" fill="#F5A520"/>
+          </svg>
+        </div>
+        <div>
+          <div class="anim-name">Pulso cuadrado B (secundario)</div>
+          <div class="anim-desc">Mismo fade desfasado — crea efecto alterno con el cuadrado A</div>
+        </div>
+        <span class="anim-value">1.5s · ease-in-out · infinite · delay 0.45s</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- USAGE GUIDELINES -->
+  <div>
+    <p class="section-title">Cuándo usar cada tamaño</p>
+    <div class="usage-grid">
+      <div class="usage-chip">
+        <span class="usage-chip-icon">🔘</span>
+        <span class="usage-chip-text"><strong>sm 24px</strong> — Botones en estado cargando, inputs</span>
+      </div>
+      <div class="usage-chip">
+        <span class="usage-chip-icon">📦</span>
+        <span class="usage-chip-text"><strong>md 40px</strong> — Cards pequeñas, datos en línea</span>
+      </div>
+      <div class="usage-chip">
+        <span class="usage-chip-icon">📋</span>
+        <span class="usage-chip-text"><strong>lg 64px</strong> — Tablas, panels, listas de facturas</span>
+      </div>
+      <div class="usage-chip">
+        <span class="usage-chip-icon">🖥️</span>
+        <span class="usage-chip-text"><strong>xl 96px</strong> — Overlay de página completa</span>
+      </div>
+      <div class="usage-chip">
+        <span class="usage-chip-icon">✨</span>
+        <span class="usage-chip-text"><strong>xxl 128px</strong> — Splash inicial de la app</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE COMPONENT -->
+  <div>
+    <p class="section-title">Componente Vue 3 — uso</p>
+    <div class="card">
+      <div class="code-wrap">
+        <pre><span class="t-cmt">&lt;!-- components/AppSpinner.vue — copiar a src/components/ --&gt;</span>
+
+<span class="t-cmt">&lt;!-- Uso básico --&gt;</span>
+<span class="t-tag">&lt;AppSpinner</span> <span class="t-attr">size</span>=<span class="t-val">"lg"</span> <span class="t-tag">/&gt;</span>
+
+<span class="t-cmt">&lt;!-- Botón con carga --&gt;</span>
+<span class="t-tag">&lt;button</span> <span class="t-attr">:disabled</span>=<span class="t-val">"loading"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;AppSpinner</span> <span class="t-attr">v-if</span>=<span class="t-val">"loading"</span> <span class="t-attr">size</span>=<span class="t-val">"sm"</span> <span class="t-tag">/&gt;</span>
+  <span class="t-tag">&lt;span</span> <span class="t-attr">v-else</span><span class="t-tag">&gt;</span>Guardar<span class="t-tag">&lt;/span&gt;</span>
+<span class="t-tag">&lt;/button&gt;</span>
+
+<span class="t-cmt">&lt;!-- Overlay de pantalla completa --&gt;</span>
+<span class="t-tag">&lt;div</span> <span class="t-attr">v-if</span>=<span class="t-val">"loading"</span> <span class="t-attr">class</span>=<span class="t-val">"overlay"</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;AppSpinner</span> <span class="t-attr">size</span>=<span class="t-val">"xl"</span> <span class="t-attr">label</span>=<span class="t-val">"Procesando factura..."</span> <span class="t-tag">/&gt;</span>
+<span class="t-tag">&lt;/div&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>Generado para <strong>Quantify 2.0</strong> · <strong>AppSpinner v1.0</strong> · 2026-07-21</p>
+    <p style="margin-top:4px;">Archivo fuente: <code style="font-size:.72rem;">.workspace/ui-components/AppSpinner.vue</code></p>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantify — Skeleton · Preview</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #E8EFF8;
+      min-height: 100vh;
+      padding: 28px 24px 80px;
+    }
+    body::before {
+      content: "";
+      display: block;
+      height: 4px;
+      background: linear-gradient(90deg, #1B6CB2 0%, #1B6CB2 60%, #F5A520 100%);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @keyframes pulse   { 0%,100% { opacity:.45; } 50% { opacity:.9; } }
+
+    .sk      { display:inline-block; background:linear-gradient(90deg,#D8E8F5 25%,#EDF5FC 50%,#D8E8F5 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; border-radius:4px; }
+    .sk.block{ display:block; width:100%; }
+    .sk-warm { display:inline-block; background:linear-gradient(90deg,#F5E3C0 25%,#FBF2E0 50%,#F5E3C0 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; border-radius:4px; }
+    .sk-green{ display:inline-block; background:linear-gradient(90deg,#C8F0D8 25%,#E5F8EE 50%,#C8F0D8 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; border-radius:4px; }
+    .sk-red  { display:inline-block; background:linear-gradient(90deg,#FECDCD 25%,#FFE8E8 50%,#FECDCD 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; border-radius:4px; }
+    .sk-side { display:inline-block; background:linear-gradient(90deg,rgba(255,255,255,.07) 25%,rgba(255,255,255,.18) 50%,rgba(255,255,255,.07) 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; border-radius:4px; }
+    .sk-side.block{ display:block; width:100%; }
+
+    .section-label { font-size:.7rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#5A6E84; margin:28px 0 12px; display:flex; align-items:center; gap:10px; }
+    .section-label::before { content:""; width:12px; height:12px; flex-shrink:0; background: #F5A520 0 0/5px 5px no-repeat, #F5A520 7px 7px/5px 5px no-repeat; }
+
+    .app-shell { display:flex; height:580px; border-radius:14px; overflow:hidden; box-shadow:0 4px 28px rgba(0,0,0,.16); }
+
+    /* ── Sidebar ── */
+    .sidebar { width:132px; background:#0C2645; flex-shrink:0; display:flex; flex-direction:column; }
+    .sidebar-brand { display:flex; align-items:center; gap:8px; padding:20px 14px 16px; border-bottom:1px solid rgba(255,255,255,.08); }
+    .brand-logo-sk svg { width:28px; height:28px; animation:pulse 1.6s ease-in-out infinite; }
+    .sidebar-nav { padding:10px 8px; display:flex; flex-direction:column; gap:4px; }
+    .nav-item-sk { display:flex; align-items:center; gap:8px; padding:8px; border-radius:7px; }
+    .nav-item-sk.active { background:rgba(255,255,255,.12); }
+    .nav-icon-sk { width:16px; height:16px; border-radius:3px; flex-shrink:0; }
+    .nav-text-sk { height:10px; border-radius:3px; }
+
+    /* ── Main ── */
+    .main { flex:1; background:#F5F7FA; display:flex; flex-direction:column; overflow:hidden; }
+    .topbar { background:#fff; border-bottom:1px solid #E8EEF5; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; }
+    .greeting-block { display:flex; flex-direction:column; gap:5px; }
+    .topbar-actions { display:flex; align-items:center; gap:10px; }
+    .content { flex:1; overflow-y:auto; padding:16px 20px; }
+
+    /* ── Stat cards ── */
+    .stat-row { display:grid; gap:12px; margin-bottom:14px; }
+    .stat-row.cols-4 { grid-template-columns:repeat(4,1fr); }
+    .stat-row.cols-3 { grid-template-columns:repeat(3,1fr); }
+    .stat-card { background:#fff; border:1px solid #E8EEF5; border-radius:10px; padding:14px 16px; }
+    .stat-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+    .stat-icon { width:22px; height:22px; border-radius:5px; }
+    .stat-amount { height:22px; border-radius:5px; margin-bottom:6px; }
+    .stat-desc { height:10px; border-radius:3px; }
+    .stat-bottom { display:flex; justify-content:flex-end; margin-top:8px; }
+    .stat-trend { height:11px; width:38px; border-radius:3px; }
+
+    /* ── Charts ── */
+    .charts-row { display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-bottom:14px; }
+    .bottom-row  { display:grid; grid-template-columns:2fr 1fr; gap:12px; }
+    .chart-card { background:#fff; border:1px solid #E8EEF5; border-radius:10px; padding:14px 16px; }
+    .chart-area { width:100%; height:160px; }
+    .chart-donut { width:100%; height:160px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; }
+    .donut-ring { width:100px; height:100px; }
+    .donut-legend { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+    .legend-item { display:flex; align-items:center; gap:4px; }
+    .legend-dot { width:7px; height:7px; border-radius:9999px; }
+
+    /* ── Bar chart ── */
+    .bar-chart { display:flex; flex-direction:column; gap:10px; padding-top:4px; }
+    .bar-row { display:flex; align-items:center; gap:8px; }
+    .bar-track { flex:1; height:14px; background:#F0F5FA; border-radius:4px; overflow:hidden; }
+    .bar-fill  { height:100%; border-radius:4px; background:linear-gradient(90deg,#C0D8EF 25%,#D8EBF8 50%,#C0D8EF 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; }
+
+    /* ── Recent bills ── */
+    .recent-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .bill-item { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid #F2F5FA; }
+    .bill-item:last-child { border-bottom:none; }
+    .bill-left { display:flex; flex-direction:column; gap:4px; }
+    .bill-right { display:flex; align-items:center; gap:8px; }
+    .bill-dot { width:8px; height:8px; border-radius:9999px; flex-shrink:0; }
+
+    /* ── Filter bar ── */
+    .filter-bar { display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+    .q-search-btn { width:34px; height:34px; flex-shrink:0; background:linear-gradient(90deg,#1565A8 25%,#2278C8 50%,#1565A8 75%); background-size:200% 100%; animation:shimmer 1.6s ease-in-out infinite; border-radius:8px; display:flex; align-items:center; justify-content:center; }
+    .q-search-btn svg { width:18px; height:18px; }
+
+    /* ── Bill table ── */
+    .bill-table { background:#fff; border:1px solid #E8EEF5; border-radius:10px; overflow:hidden; }
+    .bill-row { display:flex; align-items:center; padding:14px 16px; border-bottom:1px solid #F2F5FA; gap:0; }
+    .bill-row:last-child { border-bottom:none; }
+    .cell-status { width:110px; flex-shrink:0; display:flex; align-items:center; gap:6px; }
+    .status-dot { width:9px; height:9px; border-radius:9999px; flex-shrink:0; }
+    .cell-data { flex:1; display:flex; flex-direction:column; gap:4px; }
+    .cell-icon-label { display:flex; align-items:center; gap:4px; }
+    .cell-icon-sk { width:11px; height:11px; border-radius:2px; flex-shrink:0; }
+    .cell-action { width:80px; flex-shrink:0; display:flex; justify-content:flex-end; }
+
+    /* ── Pagination ── */
+    .bill-pagination { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; }
+    .pag-controls { display:flex; align-items:center; gap:6px; }
+    .pag-arrows { display:flex; gap:4px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ VIEW 1: DASHBOARD ═════════════════════════════ -->
+<p class="section-label">Dashboard</p>
+<div class="app-shell">
+
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo-sk">
+        <svg viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="10" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-dasharray="44" stroke-dashoffset="12" stroke-linecap="round"/>
+          <rect x="15.5" y="15.5" width="6" height="6" rx="1.2" fill="rgba(245,163,32,0.65)"/>
+          <rect x="22.5" y="22.5" width="4" height="4" rx="0.8" fill="rgba(245,163,32,0.45)"/>
+        </svg>
+      </div>
+      <div class="sk-side" style="width:56px;height:11px;"></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item-sk active"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:60px;"></div></div>
+      <div class="nav-item-sk"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:46px;"></div></div>
+      <div class="nav-item-sk"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:22px;"></div></div>
+      <div class="nav-item-sk"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:36px;"></div></div>
+      <div class="nav-item-sk"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:28px;"></div></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="greeting-block">
+        <div class="sk" style="width:140px;height:16px;"></div>
+        <div class="sk" style="width:200px;height:10px;margin-top:4px;"></div>
+      </div>
+      <div class="topbar-actions">
+        <div class="sk" style="height:30px;width:88px;border-radius:7px;"></div>
+        <div class="sk" style="width:24px;height:24px;border-radius:5px;"></div>
+        <div class="sk" style="width:32px;height:32px;border-radius:9999px;"></div>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- Stat cards x4 -->
+      <div class="stat-row cols-4">
+        <div class="stat-card">
+          <div class="stat-top"><div class="sk" style="width:70px;height:10px;"></div><div class="sk-warm stat-icon"></div></div>
+          <div class="sk stat-amount" style="width:75%;"></div>
+          <div class="sk stat-desc" style="width:65%;"></div>
+          <div class="stat-bottom"><div class="sk-green stat-trend"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="sk" style="width:90px;height:10px;"></div><div class="sk-green stat-icon"></div></div>
+          <div class="sk stat-amount" style="width:60%;"></div>
+          <div class="sk stat-desc" style="width:55%;"></div>
+          <div class="stat-bottom"><div class="sk-green stat-trend"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="sk" style="width:55px;height:10px;"></div><div class="sk-red stat-icon"></div></div>
+          <div class="sk stat-amount" style="width:65%;"></div>
+          <div class="sk stat-desc" style="width:60%;"></div>
+          <div class="stat-bottom"><div class="sk-red stat-trend"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="sk" style="width:70px;height:10px;"></div><div class="sk stat-icon"></div></div>
+          <div class="sk stat-amount" style="width:80%;"></div>
+          <div class="sk stat-desc" style="width:70%;"></div>
+          <div class="stat-bottom"><div class="sk-green stat-trend"></div></div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-row">
+        <!-- Area chart -->
+        <div class="chart-card">
+          <div class="sk" style="width:100px;height:12px;border-radius:3px;margin-bottom:4px;"></div>
+          <div class="sk" style="width:140px;height:9px;border-radius:3px;margin-bottom:12px;"></div>
+          <div class="chart-area">
+            <svg viewBox="0 0 420 150" fill="none" style="width:100%;height:100%;">
+              <rect x="0" y="4"   width="14" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="0" y="36"  width="14" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="0" y="68"  width="14" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="0" y="100" width="14" height="7" rx="2" fill="#D8E8F5"/>
+              <line x1="22" y1="8"   x2="420" y2="8"   stroke="#EAF0FA" stroke-width="1"/>
+              <line x1="22" y1="40"  x2="420" y2="40"  stroke="#EAF0FA" stroke-width="1"/>
+              <line x1="22" y1="72"  x2="420" y2="72"  stroke="#EAF0FA" stroke-width="1"/>
+              <line x1="22" y1="104" x2="420" y2="104" stroke="#EAF0FA" stroke-width="1"/>
+              <path d="M25,80 Q65,65 105,70 Q145,75 185,52 Q225,38 265,58 Q305,68 345,44 Q375,36 420,56 L420,130 L25,130 Z" fill="#F5E3C0" opacity="0.55"/>
+              <path d="M25,80 Q65,65 105,70 Q145,75 185,52 Q225,38 265,58 Q305,68 345,44 Q375,36 420,56" stroke="#F5A520" stroke-width="1.8" fill="none" opacity="0.5" stroke-linecap="round"/>
+              <path d="M25,95 Q65,82 105,86 Q145,90 185,70 Q225,60 265,78 Q305,85 345,66 Q375,58 420,74 L420,130 L25,130 Z" fill="#D8E8F5" opacity="0.55"/>
+              <path d="M25,95 Q65,82 105,86 Q145,90 185,70 Q225,60 265,78 Q305,85 345,66 Q375,58 420,74" stroke="#1B6CB2" stroke-width="1.8" fill="none" opacity="0.5" stroke-linecap="round"/>
+              <rect x="25"  y="136" width="18" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="85"  y="136" width="18" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="145" y="136" width="18" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="205" y="136" width="18" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="265" y="136" width="18" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="325" y="136" width="18" height="7" rx="2" fill="#D8E8F5"/>
+              <rect x="390" y="136" width="18" height="7" rx="2" fill="#D8E8F5"/>
+            </svg>
+          </div>
+        </div>
+        <!-- Donut -->
+        <div class="chart-card">
+          <div class="sk" style="width:80px;height:12px;border-radius:3px;margin-bottom:4px;"></div>
+          <div class="sk" style="width:90px;height:9px;border-radius:3px;margin-bottom:12px;"></div>
+          <div class="chart-donut">
+            <svg class="donut-ring" viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="36" stroke="#D8E8F5" stroke-width="14" fill="none" stroke-dasharray="56 170" stroke-dashoffset="0"/>
+              <circle cx="50" cy="50" r="36" stroke="#F5E3C0" stroke-width="14" fill="none" stroke-dasharray="40 186" stroke-dashoffset="-56"/>
+              <circle cx="50" cy="50" r="36" stroke="#C8F0D8" stroke-width="14" fill="none" stroke-dasharray="30 196" stroke-dashoffset="-96"/>
+              <circle cx="50" cy="50" r="36" stroke="#E2D8F5" stroke-width="14" fill="none" stroke-dasharray="24 202" stroke-dashoffset="-126"/>
+              <circle cx="50" cy="50" r="36" stroke="#FECDCD" stroke-width="14" fill="none" stroke-dasharray="20 206" stroke-dashoffset="-150"/>
+              <circle cx="50" cy="50" r="24" fill="white"/>
+            </svg>
+            <div class="donut-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#F5E3C0;"></div><div class="sk" style="width:40px;height:8px;border-radius:2px;"></div></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#D8E8F5;"></div><div class="sk" style="width:50px;height:8px;border-radius:2px;"></div></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#C8F0D8;"></div><div class="sk" style="width:46px;height:8px;border-radius:2px;"></div></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#E2D8F5;"></div><div class="sk" style="width:24px;height:8px;border-radius:2px;"></div></div>
+              <div class="legend-item"><div class="legend-dot" style="background:#FECDCD;"></div><div class="sk" style="width:42px;height:8px;border-radius:2px;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom row -->
+      <div class="bottom-row">
+        <!-- Bar chart -->
+        <div class="chart-card">
+          <div class="sk" style="width:130px;height:12px;border-radius:3px;margin-bottom:4px;"></div>
+          <div class="sk" style="width:90px;height:9px;border-radius:3px;margin-bottom:12px;"></div>
+          <div class="bar-chart">
+            <div class="bar-row"><div class="sk" style="width:60px;height:9px;flex-shrink:0;"></div><div class="bar-track"><div class="bar-fill" style="width:92%;"></div></div></div>
+            <div class="bar-row"><div class="sk" style="width:60px;height:9px;flex-shrink:0;"></div><div class="bar-track"><div class="bar-fill" style="width:65%;"></div></div></div>
+            <div class="bar-row"><div class="sk" style="width:48px;height:9px;flex-shrink:0;"></div><div class="bar-track"><div class="bar-fill" style="width:38%;"></div></div></div>
+            <div class="bar-row"><div class="sk" style="width:54px;height:9px;flex-shrink:0;"></div><div class="bar-track"><div class="bar-fill" style="width:28%;"></div></div></div>
+          </div>
+        </div>
+        <!-- Recent bills -->
+        <div class="chart-card">
+          <div class="recent-header">
+            <div class="sk" style="width:80px;height:12px;border-radius:3px;"></div>
+            <div class="sk" style="width:40px;height:10px;border-radius:3px;"></div>
+          </div>
+          <div class="bill-item"><div class="bill-left"><div class="sk" style="width:70px;height:12px;border-radius:3px;"></div><div class="sk" style="width:55px;height:9px;border-radius:2px;margin-top:4px;"></div></div><div class="bill-right"><div class="sk" style="width:38px;height:11px;border-radius:3px;"></div><div class="bill-dot" style="background:#C8F0D8;"></div><div class="sk-green" style="width:44px;height:9px;border-radius:2px;"></div></div></div>
+          <div class="bill-item"><div class="bill-left"><div class="sk" style="width:60px;height:12px;border-radius:3px;"></div><div class="sk" style="width:48px;height:9px;border-radius:2px;margin-top:4px;"></div></div><div class="bill-right"><div class="sk" style="width:38px;height:11px;border-radius:3px;"></div><div class="bill-dot" style="background:#D8E8F5;"></div><div class="sk" style="width:44px;height:9px;border-radius:2px;"></div></div></div>
+          <div class="bill-item"><div class="bill-left"><div class="sk" style="width:65px;height:12px;border-radius:3px;"></div><div class="sk" style="width:50px;height:9px;border-radius:2px;margin-top:4px;"></div></div><div class="bill-right"><div class="sk" style="width:38px;height:11px;border-radius:3px;"></div><div class="bill-dot" style="background:#F5E3C0;"></div><div class="sk-warm" style="width:44px;height:9px;border-radius:2px;"></div></div></div>
+          <div class="bill-item"><div class="bill-left"><div class="sk" style="width:68px;height:12px;border-radius:3px;"></div><div class="sk" style="width:44px;height:9px;border-radius:2px;margin-top:4px;"></div></div><div class="bill-right"><div class="sk" style="width:38px;height:11px;border-radius:3px;"></div><div class="bill-dot" style="background:#D8E8F5;"></div><div class="sk" style="width:44px;height:9px;border-radius:2px;"></div></div></div>
+          <div class="bill-item"><div class="bill-left"><div class="sk" style="width:72px;height:12px;border-radius:3px;"></div><div class="sk" style="width:52px;height:9px;border-radius:2px;margin-top:4px;"></div></div><div class="bill-right"><div class="sk" style="width:38px;height:11px;border-radius:3px;"></div><div class="bill-dot" style="background:#EAE0F5;"></div><div class="sk" style="width:44px;height:9px;border-radius:2px;"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ VIEW 2: BILL LIST ════════════════════════════ -->
+<p class="section-label">Lista de Bills</p>
+<div class="app-shell">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo-sk">
+        <svg viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="10" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-dasharray="44" stroke-dashoffset="12" stroke-linecap="round"/>
+          <rect x="15.5" y="15.5" width="6" height="6" rx="1.2" fill="rgba(245,163,32,0.65)"/>
+          <rect x="22.5" y="22.5" width="4" height="4" rx="0.8" fill="rgba(245,163,32,0.45)"/>
+        </svg>
+      </div>
+      <div class="sk-side" style="width:56px;height:11px;"></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-item-sk"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:60px;"></div></div>
+      <div class="nav-item-sk active"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:22px;"></div></div>
+      <div class="nav-item-sk"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:40px;"></div></div>
+      <div class="nav-item-sk"><div class="sk-side nav-icon-sk"></div><div class="sk-side nav-text-sk" style="width:30px;"></div></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div class="greeting-block">
+        <div class="sk" style="width:130px;height:16px;"></div>
+        <div class="sk" style="width:160px;height:10px;margin-top:4px;"></div>
+      </div>
+      <div class="topbar-actions">
+        <div class="sk" style="width:24px;height:24px;border-radius:5px;"></div>
+        <div class="sk" style="width:32px;height:32px;border-radius:9999px;"></div>
+      </div>
+    </div>
+    <div class="content">
+      <!-- Stat cards x3 -->
+      <div class="stat-row cols-3">
+        <div class="stat-card"><div class="stat-top"><div class="sk" style="width:75px;height:10px;"></div><div class="sk stat-icon"></div></div><div class="sk stat-amount" style="width:70%;"></div><div class="sk stat-desc" style="width:60%;"></div></div>
+        <div class="stat-card"><div class="stat-top"><div class="sk" style="width:85px;height:10px;"></div><div class="sk-red stat-icon"></div></div><div class="sk stat-amount" style="width:65%;"></div><div class="sk stat-desc" style="width:55%;"></div></div>
+        <div class="stat-card"><div class="stat-top"><div class="sk" style="width:95px;height:10px;"></div><div class="sk stat-icon"></div></div><div class="sk stat-amount" style="width:40%;"></div><div class="sk stat-desc" style="width:50%;"></div></div>
+      </div>
+      <!-- Filter bar with Q button -->
+      <div class="filter-bar">
+        <div class="sk" style="height:34px;width:140px;border-radius:7px;"></div>
+        <div class="sk" style="height:34px;width:90px;border-radius:7px;"></div>
+        <div class="q-search-btn">
+          <svg viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="6.5" stroke="rgba(255,255,255,0.45)" stroke-width="2.5" stroke-dasharray="26" stroke-dashoffset="7" stroke-linecap="round"/>
+            <rect x="10" y="10" width="4" height="4" rx="0.8" fill="rgba(255,255,255,0.3)"/>
+          </svg>
+        </div>
+        <div class="sk-warm" style="height:34px;width:84px;border-radius:20px;"></div>
+        <div class="sk" style="height:34px;width:78px;border-radius:20px;"></div>
+      </div>
+      <!-- Bill table -->
+      <div class="bill-table">
+        <div class="bill-row">
+          <div class="cell-status"><div class="status-dot" style="background:#C8F0D8;"></div><div class="sk-green" style="height:11px;border-radius:3px;flex:1;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:80px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:55px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:66px;height:11px;border-radius:3px;"></div><div class="sk-green" style="height:16px;width:36px;border-radius:4px;margin-top:2px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:44px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:52px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-action"><div class="sk" style="height:28px;border-radius:6px;width:70px;"></div></div>
+        </div>
+        <div class="bill-row">
+          <div class="cell-status"><div class="status-dot" style="background:#D8E8F5;"></div><div class="sk" style="height:11px;border-radius:3px;flex:1;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:70px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:60px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:66px;height:11px;border-radius:3px;"></div><div class="sk-green" style="height:16px;width:36px;border-radius:4px;margin-top:2px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:44px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:52px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-action"><div class="sk" style="height:28px;border-radius:6px;width:70px;"></div></div>
+        </div>
+        <div class="bill-row">
+          <div class="cell-status"><div class="status-dot" style="background:#F5E3C0;"></div><div class="sk-warm" style="height:11px;border-radius:3px;flex:1;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:85px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:50px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:66px;height:11px;border-radius:3px;"></div><div class="sk-warm" style="height:16px;width:36px;border-radius:4px;margin-top:2px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:44px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:52px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-action"><div class="sk-warm" style="height:28px;border-radius:6px;width:70px;"></div></div>
+        </div>
+        <div class="bill-row">
+          <div class="cell-status"><div class="status-dot" style="background:#D8E8F5;"></div><div class="sk" style="height:11px;border-radius:3px;flex:1;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:75px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:58px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:66px;height:11px;border-radius:3px;"></div><div class="sk-green" style="height:16px;width:36px;border-radius:4px;margin-top:2px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:44px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:52px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-action"><div class="sk" style="height:28px;border-radius:6px;width:70px;"></div></div>
+        </div>
+        <div class="bill-row">
+          <div class="cell-status"><div class="status-dot" style="background:#DDE5EE;"></div><div class="sk" style="height:11px;border-radius:3px;flex:1;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:90px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:62px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:66px;height:11px;border-radius:3px;"></div><div class="sk" style="height:16px;width:36px;border-radius:4px;margin-top:2px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:44px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-data"><div class="cell-icon-label"><div class="sk cell-icon-sk"></div><div class="sk" style="width:36px;height:9px;border-radius:2px;"></div></div><div class="sk" style="width:52px;height:11px;border-radius:3px;"></div></div>
+          <div class="cell-action"><div class="sk" style="height:28px;border-radius:6px;width:70px;"></div></div>
+        </div>
+      </div>
+      <!-- Pagination -->
+      <div class="bill-pagination" style="margin-top:10px;">
+        <div class="sk" style="height:10px;width:50px;border-radius:3px;"></div>
+        <div class="pag-controls">
+          <div class="sk" style="height:10px;width:70px;border-radius:3px;"></div>
+          <div class="sk" style="height:24px;width:48px;border-radius:5px;"></div>
+          <div class="pag-arrows">
+            <div class="sk" style="width:24px;height:24px;border-radius:5px;"></div>
+            <div class="sk" style="width:24px;height:24px;border-radius:5px;"></div>
+            <div class="sk" style="width:24px;height:24px;border-radius:5px;"></div>
+            <div class="sk" style="width:24px;height:24px;border-radius:5px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
