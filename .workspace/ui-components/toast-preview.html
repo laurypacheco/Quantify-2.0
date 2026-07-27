@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quantify — AppToast · Preview</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #F0F4FA;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 44px 24px 64px;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .page-title svg { width: 32px; height: 32px; }
+    .page-title h1 {
+      color: #1B6CB2;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── Section label ──────────────────────────── */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #8AA3BE;
+      align-self: flex-start;
+      margin-left: 4px;
+    }
+
+    /* ── Row ────────────────────────────────────── */
+    .row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* ── Card wrapper ───────────────────────────── */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 24px 20px;
+      box-shadow: 0 2px 12px rgba(27, 108, 178, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .label {
+      font-size: 0.72rem;
+      color: #6B7C93;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── Demo card (dark background — simulates app) */
+    .card-app {
+      background: #0C2645;
+    }
+    .label-app { color: #4A7FAA; }
+
+    /* ═══════════════════════════════════════════
+       TOAST COMPONENT
+    ═══════════════════════════════════════════ */
+
+    /* Container — fixed top-right (live demo only) */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      width: 300px;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0);    opacity: 1; }
+      to   { transform: translateX(120%); opacity: 0; }
+    }
+    @keyframes shrink {
+      from { width: 100%; }
+      to   { width: 0%;   }
+    }
+    @keyframes q-pulse {
+      0%, 100% { opacity: 1;   }
+      50%       { opacity: 0.4; }
+    }
+
+    /* ── Toast card ─────────────────────────────── */
+    .q-toast {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow:
+        0 10px 36px rgba(12, 38, 69, .14),
+        0 2px  8px  rgba(12, 38, 69, .07);
+      overflow: hidden;
+      position: relative;
+      width: 300px;
+    }
+
+    /* Left type border */
+    .q-toast--success { border-left: 3.5px solid #16A34A; }
+    .q-toast--warning { border-left: 3.5px solid #F5A520; }
+    .q-toast--error   { border-left: 3.5px solid #DC2626; }
+    .q-toast--info    { border-left: 3.5px solid #1B6CB2; }
+
+    /* Orange double-square motif (logo DNA) */
+    .q-toast::after {
+      content: "";
+      position: absolute;
+      top: 9px;
+      right: 36px;
+      width: 9px;
+      height: 9px;
+      background:
+        #F5A520 0    0   / 4px 4px no-repeat,
+        #F5A520 5px 5px  / 4px 4px no-repeat;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    /* Inner layout */
+    .q-toast__inner {
+      display: flex;
+      align-items: flex-start;
+      padding: 14px 12px 12px 14px;
+      gap: 11px;
+    }
+
+    /* ── Q-arc icon (DNA del logo) ──────────────── */
+    .q-toast__icon {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+    .q-toast__icon svg {
+      width: 36px;
+      height: 36px;
+      display: block;
+    }
+    /* Orange squares on icon pulse like the spinner */
+    .q-toast__icon .sq-a { animation: q-pulse 1.8s ease-in-out infinite; }
+    .q-toast__icon .sq-b { animation: q-pulse 1.8s ease-in-out infinite 0.5s; }
+
+    /* ── Text ───────────────────────────────────── */
+    .q-toast__text { flex: 1; min-width: 0; }
+    .q-toast__title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #0C2645;
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+    .q-toast__msg {
+      font-size: 0.75rem;
+      color: #5A6E84;
+      line-height: 1.5;
+    }
+
+    /* ── Close button ───────────────────────────── */
+    .q-toast__close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #B0C4D4;
+      font-size: 0.9rem;
+      padding: 3px 5px;
+      border-radius: 5px;
+      flex-shrink: 0;
+      margin-top: -1px;
+      line-height: 1;
+      transition: color .15s, background .15s;
+    }
+    .q-toast__close:hover {
+      color: #0C2645;
+      background: #EEF5FB;
+    }
+
+    /* ── Progress bar — Quantify gradient ──────── */
+    .q-toast__progress {
+      height: 3px;
+      background: #EEF5FB;
+    }
+    .q-toast__bar {
+      height: 100%;
+      width: 100%;
+      border-radius: 0 0 0 2px;
+    }
+    .q-toast--success .q-toast__bar,
+    .q-toast--warning .q-toast__bar,
+    .q-toast--info    .q-toast__bar {
+      background: linear-gradient(90deg, #1B6CB2, #F5A520);
+    }
+    .q-toast--error .q-toast__bar {
+      background: linear-gradient(90deg, #DC2626, #F87171);
+    }
+
+    /* ── Live toast (animated) ──────────────────── */
+    .q-toast--live {
+      pointer-events: all;
+      animation: slideIn .38s cubic-bezier(.34, 1.56, .64, 1) forwards;
+    }
+    .q-toast--live.leaving {
+      animation: slideOut .25s ease-in forwards;
+    }
+    .q-toast--live .q-toast__bar {
+      animation: shrink 4s linear forwards;
+    }
+
+    /* ── Demo trigger buttons ───────────────────── */
+    .triggers {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .trig-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 16px;
+      border-radius: 9px;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: transform .12s, box-shadow .12s;
+      background: #fff;
+    }
+    .trig-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+    .trig-btn:active { transform: none; }
+    .trig-btn--success { border-color: #16A34A; color: #16A34A; }
+    .trig-btn--warning { border-color: #F5A520; color: #B45309; }
+    .trig-btn--error   { border-color: #DC2626; color: #DC2626; }
+    .trig-btn--info    { border-color: #1B6CB2; color: #1B6CB2; }
+    .trig-btn--all {
+      background: linear-gradient(135deg, #1B6CB2, #F5A520);
+      color: #fff;
+      border-color: transparent;
+    }
+    .trig-hint {
+      font-size: 0.7rem;
+      color: #8AA3BE;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Live toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Header -->
+<div class="page-title">
+  <svg viewBox="0 0 32 32" fill="none">
+    <circle cx="16" cy="16" r="12" stroke="#1B6CB2" stroke-width="4.5"
+            stroke-dasharray="53" stroke-dashoffset="15" stroke-linecap="round"/>
+    <rect x="18.5" y="18.5" width="7" height="7" rx="1.5" fill="#F5A520"/>
+    <rect x="26.5" y="26.5" width="4.5" height="4.5" rx="1" fill="#F5A520" opacity=".65"/>
+  </svg>
+  <h1>Quantify — AppToast</h1>
+</div>
+
+<!-- ── VARIANTES ──────────────────────────────── -->
+<p class="section-label">Variantes</p>
+<div class="row">
+
+  <!-- SUCCESS -->
+  <div class="card">
+    <div class="q-toast q-toast--success">
+      <div class="q-toast__inner">
+        <div class="q-toast__icon">
+          <svg viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="15" fill="#DCFCE7"/>
+            <circle cx="18" cy="18" r="15" stroke="#16A34A" stroke-width="2.2"
+                    stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+            <rect class="sq-a" x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520"/>
+            <rect class="sq-b" x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520"/>
+            <path d="M11 18l5 5 9-9" stroke="#16A34A" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="q-toast__text">
+          <p class="q-toast__title">Cambios guardados</p>
+          <p class="q-toast__msg">Todos los cambios fueron guardados exitosamente.</p>
+        </div>
+        <button class="q-toast__close">✕</button>
+      </div>
+      <div class="q-toast__progress">
+        <div class="q-toast__bar" style="width:60%;"></div>
+      </div>
+    </div>
+    <span class="label">success</span>
+  </div>
+
+  <!-- WARNING -->
+  <div class="card">
+    <div class="q-toast q-toast--warning">
+      <div class="q-toast__inner">
+        <div class="q-toast__icon">
+          <svg viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="15" fill="#FEF3C7"/>
+            <circle cx="18" cy="18" r="15" stroke="#F5A520" stroke-width="2.2"
+                    stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+            <rect class="sq-a" x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520"/>
+            <rect class="sq-b" x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520"/>
+            <path d="M18 12v7.5" stroke="#F5A520" stroke-width="2.2" stroke-linecap="round"/>
+            <circle cx="18" cy="23.5" r="1.4" fill="#F5A520"/>
+          </svg>
+        </div>
+        <div class="q-toast__text">
+          <p class="q-toast__title">Advertencia</p>
+          <p class="q-toast__msg">Algunos campos no pudieron completarse.</p>
+        </div>
+        <button class="q-toast__close">✕</button>
+      </div>
+      <div class="q-toast__progress">
+        <div class="q-toast__bar" style="width:45%;"></div>
+      </div>
+    </div>
+    <span class="label">warning</span>
+  </div>
+
+  <!-- ERROR -->
+  <div class="card">
+    <div class="q-toast q-toast--error">
+      <div class="q-toast__inner">
+        <div class="q-toast__icon">
+          <svg viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="15" fill="#FEE2E2"/>
+            <circle cx="18" cy="18" r="15" stroke="#DC2626" stroke-width="2.2"
+                    stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+            <rect class="sq-a" x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520"/>
+            <rect class="sq-b" x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520"/>
+            <path d="M13 13l10 10M23 13L13 23" stroke="#DC2626" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="q-toast__text">
+          <p class="q-toast__title">Error al guardar</p>
+          <p class="q-toast__msg">Ocurrió un error inesperado. Inténtalo de nuevo.</p>
+        </div>
+        <button class="q-toast__close">✕</button>
+      </div>
+      <div class="q-toast__progress">
+        <div class="q-toast__bar" style="width:80%;"></div>
+      </div>
+    </div>
+    <span class="label">error</span>
+  </div>
+
+  <!-- INFO -->
+  <div class="card">
+    <div class="q-toast q-toast--info">
+      <div class="q-toast__inner">
+        <div class="q-toast__icon">
+          <svg viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="15" fill="#DBEAFE"/>
+            <circle cx="18" cy="18" r="15" stroke="#1B6CB2" stroke-width="2.2"
+                    stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+            <rect class="sq-a" x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520"/>
+            <rect class="sq-b" x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520"/>
+            <circle cx="18" cy="12" r="1.4" fill="#1B6CB2"/>
+            <path d="M18 16v8" stroke="#1B6CB2" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="q-toast__text">
+          <p class="q-toast__title">Información</p>
+          <p class="q-toast__msg">Esta acción actualizará los registros relacionados.</p>
+        </div>
+        <button class="q-toast__close">✕</button>
+      </div>
+      <div class="q-toast__progress">
+        <div class="q-toast__bar" style="width:30%;"></div>
+      </div>
+    </div>
+    <span class="label">info</span>
+  </div>
+
+</div>
+
+<!-- ── DARK MODE ──────────────────────────────── -->
+<p class="section-label">En la app (dark sidebar)</p>
+<div class="row">
+  <div class="card card-app">
+    <!-- Mini Quantify app frame -->
+    <div style="display:flex;border-radius:10px;overflow:hidden;width:500px;height:220px;box-shadow:0 4px 20px rgba(0,0,0,.3);">
+      <!-- Sidebar -->
+      <div style="width:100px;background:#0C2645;flex-shrink:0;padding:14px 10px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="12" stroke="rgba(255,255,255,.6)" stroke-width="4"
+                    stroke-dasharray="53" stroke-dashoffset="15" stroke-linecap="round"/>
+            <rect x="18" y="18" width="7" height="7" rx="1.5" fill="#F5A520" opacity=".8"/>
+          </svg>
+          <span style="color:rgba(255,255,255,.7);font-size:.62rem;font-weight:600;">Quantify</span>
+        </div>
+        <div style="background:rgba(255,255,255,.12);border-radius:6px;padding:5px 7px;display:flex;gap:5px;align-items:center;">
+          <div style="width:10px;height:10px;background:rgba(255,255,255,.4);border-radius:2px;"></div>
+          <div style="width:38px;height:7px;background:rgba(255,255,255,.35);border-radius:2px;"></div>
+        </div>
+        <div style="border-radius:6px;padding:5px 7px;display:flex;gap:5px;align-items:center;">
+          <div style="width:10px;height:10px;background:rgba(255,255,255,.25);border-radius:2px;"></div>
+          <div style="width:22px;height:7px;background:rgba(255,255,255,.2);border-radius:2px;"></div>
+        </div>
+        <div style="border-radius:6px;padding:5px 7px;display:flex;gap:5px;align-items:center;">
+          <div style="width:10px;height:10px;background:rgba(255,255,255,.25);border-radius:2px;"></div>
+          <div style="width:30px;height:7px;background:rgba(255,255,255,.2);border-radius:2px;"></div>
+        </div>
+      </div>
+      <!-- Main -->
+      <div style="flex:1;background:#F5F7FA;position:relative;overflow:hidden;">
+        <!-- Topbar -->
+        <div style="background:#fff;border-bottom:1px solid #E8EEF5;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;flex-direction:column;gap:3px;">
+            <div style="width:80px;height:9px;background:#D8E8F5;border-radius:3px;"></div>
+            <div style="width:110px;height:7px;background:#EAF0FA;border-radius:2px;"></div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div style="width:18px;height:18px;background:#EAF0FA;border-radius:4px;"></div>
+            <div style="width:22px;height:22px;background:#D8E8F5;border-radius:9999px;"></div>
+          </div>
+        </div>
+        <!-- Content skeleton -->
+        <div style="padding:12px 14px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+            <div style="background:#fff;border-radius:7px;padding:9px;border:1px solid #E8EEF5;height:44px;"></div>
+            <div style="background:#fff;border-radius:7px;padding:9px;border:1px solid #E8EEF5;height:44px;"></div>
+            <div style="background:#fff;border-radius:7px;padding:9px;border:1px solid #E8EEF5;height:44px;"></div>
+          </div>
+          <div style="background:#fff;border-radius:7px;padding:9px;border:1px solid #E8EEF5;height:56px;"></div>
+        </div>
+        <!-- Toast inside the app frame -->
+        <div style="position:absolute;top:10px;right:10px;">
+          <div class="q-toast q-toast--success" style="width:200px;font-size:.78em;">
+            <div class="q-toast__inner" style="padding:10px 9px 8px 10px;gap:8px;">
+              <div class="q-toast__icon" style="width:26px;height:26px;">
+                <svg viewBox="0 0 36 36" fill="none" style="width:26px;height:26px;">
+                  <circle cx="18" cy="18" r="15" fill="#DCFCE7"/>
+                  <circle cx="18" cy="18" r="15" stroke="#16A34A" stroke-width="2.2"
+                          stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+                  <rect class="sq-a" x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520"/>
+                  <rect class="sq-b" x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520"/>
+                  <path d="M11 18l5 5 9-9" stroke="#16A34A" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="q-toast__text">
+                <p class="q-toast__title" style="font-size:.78rem;">Cambios guardados</p>
+                <p class="q-toast__msg" style="font-size:.68rem;">Operación completada.</p>
+              </div>
+            </div>
+            <div class="q-toast__progress">
+              <div class="q-toast__bar" style="width:55%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="label label-app">en contexto — Quantify app</span>
+  </div>
+</div>
+
+<!-- ── DEMO INTERACTIVO ───────────────────────── -->
+<p class="section-label">Demo en vivo</p>
+<div class="card" style="gap:16px;">
+  <div class="triggers">
+    <button class="trig-btn trig-btn--success" onclick="showToast('success')">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#16A34A" stroke-width="1.5"/><path d="M4 7l2 2 4-4" stroke="#16A34A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Cambios guardados
+    </button>
+    <button class="trig-btn trig-btn--warning" onclick="showToast('warning')">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 2L13 12H1L7 2Z" stroke="#F5A520" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 6v3" stroke="#F5A520" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="10.5" r=".75" fill="#F5A520"/></svg>
+      Advertencia
+    </button>
+    <button class="trig-btn trig-btn--error" onclick="showToast('error')">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#DC2626" stroke-width="1.5"/><path d="M4.5 4.5l5 5M9.5 4.5l-5 5" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Error
+    </button>
+    <button class="trig-btn trig-btn--info" onclick="showToast('info')">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#1B6CB2" stroke-width="1.5"/><circle cx="7" cy="4.5" r=".75" fill="#1B6CB2"/><path d="M7 6.5v3.5" stroke="#1B6CB2" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Info
+    </button>
+    <button class="trig-btn trig-btn--all" onclick="showAll()">▶ Todos</button>
+  </div>
+  <p class="trig-hint">Aparece en la esquina superior derecha · se cierra en 4 s</p>
+</div>
+
+<script>
+  const DATA = {
+    success: {
+      title: 'Cambios guardados',
+      msg: 'Todos los cambios fueron guardados exitosamente.',
+      icon: `<svg viewBox="0 0 36 36" fill="none" style="width:36px;height:36px;">
+        <circle cx="18" cy="18" r="15" fill="#DCFCE7"/>
+        <circle cx="18" cy="18" r="15" stroke="#16A34A" stroke-width="2.2"
+                stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+        <rect x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite"/>
+        <rect x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite .5s"/>
+        <path d="M11 18l5 5 9-9" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`
+    },
+    warning: {
+      title: 'Advertencia',
+      msg: 'Algunos campos no pudieron completarse. Revisa los datos.',
+      icon: `<svg viewBox="0 0 36 36" fill="none" style="width:36px;height:36px;">
+        <circle cx="18" cy="18" r="15" fill="#FEF3C7"/>
+        <circle cx="18" cy="18" r="15" stroke="#F5A520" stroke-width="2.2"
+                stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+        <rect x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite"/>
+        <rect x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite .5s"/>
+        <path d="M18 12v7.5" stroke="#F5A520" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="18" cy="23.5" r="1.4" fill="#F5A520"/>
+      </svg>`
+    },
+    error: {
+      title: 'Error al guardar',
+      msg: 'Ocurrió un error inesperado. Inténtalo de nuevo.',
+      icon: `<svg viewBox="0 0 36 36" fill="none" style="width:36px;height:36px;">
+        <circle cx="18" cy="18" r="15" fill="#FEE2E2"/>
+        <circle cx="18" cy="18" r="15" stroke="#DC2626" stroke-width="2.2"
+                stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+        <rect x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite"/>
+        <rect x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite .5s"/>
+        <path d="M13 13l10 10M23 13L13 23" stroke="#DC2626" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>`
+    },
+    info: {
+      title: 'Información',
+      msg: 'Esta acción actualizará los registros relacionados.',
+      icon: `<svg viewBox="0 0 36 36" fill="none" style="width:36px;height:36px;">
+        <circle cx="18" cy="18" r="15" fill="#DBEAFE"/>
+        <circle cx="18" cy="18" r="15" stroke="#1B6CB2" stroke-width="2.2"
+                stroke-dasharray="66" stroke-dashoffset="19" stroke-linecap="round" fill="none"/>
+        <rect x="22" y="22" width="6" height="6" rx="1.2" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite"/>
+        <rect x="29" y="29" width="4" height="4" rx=".8" fill="#F5A520" style="animation:q-pulse 1.8s ease-in-out infinite .5s"/>
+        <circle cx="18" cy="12" r="1.4" fill="#1B6CB2"/>
+        <path d="M18 16v8" stroke="#1B6CB2" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>`
+    }
+  };
+
+  function showToast(type) {
+    const d = DATA[type];
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `q-toast q-toast--${type} q-toast--live`;
+    const bar = type === 'error'
+      ? 'background:linear-gradient(90deg,#DC2626,#F87171);'
+      : 'background:linear-gradient(90deg,#1B6CB2,#F5A520);';
+    t.innerHTML = `
+      <div class="q-toast__inner">
+        <div class="q-toast__icon">${d.icon}</div>
+        <div class="q-toast__text">
+          <p class="q-toast__title">${d.title}</p>
+          <p class="q-toast__msg">${d.msg}</p>
+        </div>
+        <button class="q-toast__close" onclick="dismiss(this.closest('.q-toast'))">✕</button>
+      </div>
+      <div class="q-toast__progress">
+        <div class="q-toast__bar" style="${bar} animation:shrink 4s linear forwards;"></div>
+      </div>`;
+    c.prepend(t);
+    t._t = setTimeout(() => dismiss(t), 4000);
+  }
+
+  function dismiss(t) {
+    if (!t || t.classList.contains('leaving')) return;
+    clearTimeout(t._t);
+    t.classList.add('leaving');
+    t.addEventListener('animationend', () => t.remove(), { once: true });
+  }
+
+  function showAll() {
+    ['info','error','warning','success'].forEach((tp, i) =>
+      setTimeout(() => showToast(tp), i * 180));
+  }
+</script>
+</body>
+</html>
