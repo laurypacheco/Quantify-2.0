@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f1f5f9; padding: 20px; }
+  h1 { font-size: 16px; color: #0f172a; margin-bottom: 4px; }
+  .subtitle { font-size: 12px; color: #64748b; margin-bottom: 16px; }
+  .cols { display: flex; gap: 16px; }
+  .col { flex: 1; }
+  .col-header { padding: 8px 14px; border-radius: 8px 8px 0 0; font-size: 13px; font-weight: 700; color: white; }
+  .reviewer .col-header { background: #3b82f6; }
+  .approver .col-header { background: #8b5cf6; }
+  .role-badge { font-size: 10px; font-weight: 400; opacity: .85; margin-left: 6px; }
+  .card { background: white; border-radius: 0 0 8px 8px; padding: 16px; border: 2px solid transparent; }
+  .reviewer .card { border-color: #3b82f6; }
+  .approver .card { border-color: #8b5cf6; }
+  .kpi-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .kpi { flex: 1; padding: 10px 12px; border-radius: 8px; border: 2px solid #e2e8f0; }
+  .kpi-label { font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
+  .kpi-value { font-size: 18px; font-weight: 700; color: #0f172a; }
+  .kpi-sub { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+  .kpi.wrong { border-color: #ef4444; background: #fef2f2; }
+  .kpi.wrong .kpi-label { color: #ef4444; }
+  .kpi.correct { border-color: #22c55e; background: #f0fdf4; }
+  .kpi.correct .kpi-label { color: #166534; }
+  .chart-label { font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; }
+  .chart-sub { font-size: 10px; color: #94a3b8; margin-bottom: 8px; }
+  .chart-bar { height: 8px; border-radius: 4px; margin-bottom: 5px; }
+  .chart-mock { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0; margin-bottom: 12px; }
+  .note { font-size: 10px; color: #64748b; font-style: italic; padding: 6px 8px; background: #fef9c3; border-radius: 4px; border-left: 3px solid #eab308; margin-top: 8px; }
+  .vs { display: flex; align-items: center; justify-content: center; width: 36px; flex-shrink: 0; }
+  .vs-inner { font-size: 11px; font-weight: 700; color: #64748b; writing-mode: vertical-rl; letter-spacing: 2px; }
+  .section-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; margin-top: 12px; }
+  .identical-badge { display: block; text-align: center; font-size: 11px; font-weight: 700; color: #dc2626; padding: 5px; background: #fee2e2; border-radius: 5px; margin: 8px 0; border: 1px dashed #dc2626; }
+  .nav-item { padding: 6px 10px; border-radius: 5px; font-size: 12px; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<h1>Dashboards de Reviewer vs Approver — Mismos datos, roles diferentes</h1>
+<p class="subtitle">Ambos roles ven el <strong>mismo layout y los mismos KPIs</strong>, pero sus responsabilidades son completamente distintas.</p>
+
+<div class="cols">
+  <div class="col reviewer">
+    <div class="col-header">REVIEWER — Maria Rivera <span class="role-badge">Revisa bills Submitted → marca como Reviewed</span></div>
+    <div class="card">
+      <div class="section-title">KPIs que ve</div>
+      <div class="kpi-row">
+        <div class="kpi correct"><div class="kpi-label">OK — Total Pending</div><div class="kpi-value">$10,000</div><div class="kpi-sub">5 bills awaiting action</div></div>
+        <div class="kpi correct"><div class="kpi-label">OK — Approved This Month</div><div class="kpi-value">$2,000</div><div class="kpi-sub">1 bill approved</div></div>
+      </div>
+      <div class="note">OK: "Total Pending" muestra bills en estado Submitted — exactamente la cola del Reviewer.</div>
+      <div class="section-title">Grafico principal</div>
+      <div class="chart-mock">
+        <div class="chart-label">Bills Trend</div>
+        <div class="chart-sub">Submitted vs Approved — last 7 months</div>
+        <div class="chart-bar" style="background:#f97316;width:80%;"></div>
+        <div class="chart-bar" style="background:#22c55e;width:55%;"></div>
+      </div>
+      <div class="note">OK: Ver tendencia de "Submitted" ayuda al Reviewer a anticipar su carga de trabajo.</div>
+      <div class="section-title">Sidebar</div>
+      <div class="nav-item" style="background:#eff6ff;color:#1d4ed8;font-weight:600;">Dashboard</div>
+      <div class="nav-item" style="background:#f8fafc;color:#475569;">Bill</div>
+      <div class="nav-item" style="background:#f8fafc;color:#475569;">Reports — TIENE ACCESO</div>
+      <div class="nav-item" style="background:#f8fafc;color:#475569;">Help</div>
+    </div>
+  </div>
+
+  <div class="vs"><div class="vs-inner">VS</div></div>
+
+  <div class="col approver">
+    <div class="col-header">APPROVER — Pedro Martinez <span class="role-badge">Aprueba bills Reviewed → marca como Approved</span></div>
+    <div class="card">
+      <div class="section-title">KPIs que ve</div>
+      <div class="kpi-row">
+        <div class="kpi wrong"><div class="kpi-label">ERROR — Total Pending</div><div class="kpi-value">$10,000</div><div class="kpi-sub">5 bills awaiting action</div></div>
+        <div class="kpi correct"><div class="kpi-label">OK — Approved This Month</div><div class="kpi-value">$2,000</div><div class="kpi-sub">1 bill approved</div></div>
+      </div>
+      <div class="note">ERROR: "Total Pending" muestra bills Submitted, pero esos son para el Reviewer. El Approver solo trabaja con bills en estado Reviewed. Este numero no es su cola real.</div>
+      <div class="section-title">Grafico principal</div>
+      <div class="chart-mock">
+        <div class="chart-label">Bills Trend</div>
+        <div class="chart-sub" style="color:#dc2626;font-weight:600;">ERROR: Submitted vs Approved — last 7 months</div>
+        <div class="chart-bar" style="background:#f97316;width:80%;"></div>
+        <div class="chart-bar" style="background:#22c55e;width:55%;"></div>
+      </div>
+      <div class="note">ERROR: El Approver no necesita ver cuantos bills se Submitted. Necesita ver cuantos estan en Reviewed (listos para el) y su ratio aprobacion/rechazo.</div>
+      <div class="section-title">Sidebar</div>
+      <div class="nav-item" style="background:#f5f3ff;color:#7c3aed;font-weight:600;">Dashboard</div>
+      <div class="nav-item" style="background:#f8fafc;color:#475569;">Bill</div>
+      <div class="nav-item" style="background:white;color:#dc2626;border:1px dashed #e2e8f0;font-weight:600;">Reports — NO TIENE ACCESO</div>
+      <div class="nav-item" style="background:#f8fafc;color:#475569;">Help</div>
+      <div class="identical-badge">Todo el layout es copia exacta del Reviewer — solo cambia el nombre Hello, Pedro</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px;background:white;border-radius:8px;padding:16px;border:2px solid #f97316;">
+  <div style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:10px;">Lo que deberia mostrar cada dashboard</div>
+  <div style="display:flex;gap:20px;font-size:12px;color:#475569;">
+    <div style="flex:1;padding:10px;background:#eff6ff;border-radius:6px;">
+      <strong style="color:#1d4ed8;">Reviewer deberia ver:</strong><br><br>
+      Bills pendientes de mi revision (Submitted)<br>
+      Tendencia: cuantos me llegaron esta semana<br>
+      Tiempo promedio de revision<br>
+      Queue ordenada por deadline
+    </div>
+    <div style="flex:1;padding:10px;background:#f5f3ff;border-radius:6px;">
+      <strong style="color:#7c3aed;">Approver deberia ver:</strong><br><br>
+      Bills listos para aprobar (Reviewed)<br>
+      Tendencia: Reviewed vs Approved (no Submitted)<br>
+      Mi ratio de aprobacion vs rechazo<br>
+      Bills que rechace con motivo pendiente
+    </div>
+  </div>
+</div>
+</body>
+</html>
