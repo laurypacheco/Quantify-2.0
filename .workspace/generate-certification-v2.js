@@ -423,7 +423,7 @@ async function buildExcel() {
       row.height = 80;
 
       const isModuleChange = t.module !== prevModule;
-      const rowBg = isModuleChange ? SHEET_COLORS[name].light : 'FFFFFFFF';
+      const rowBg = isModuleChange ? SHEET_COLORS[name].light : 'FFFFFF';
       prevModule = t.module;
 
       for (let c = 1; c <= HEADERS.length; c++) {
