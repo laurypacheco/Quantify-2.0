@@ -1,5 +1,16 @@
 {
+  "name": "quantify-2-0-qa",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test --project=chromium --headed",
+    "test:e2e:debug": "cross-env PWDEBUG=1 playwright test --project=chromium --headed",
+    "test:e2e:slow": "cross-env SLOW_MO=600 playwright test --project=chromium --headed",
+    "test:e2e:report": "playwright show-report"
+  },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.2",
     "exceljs": "^4.4.0",
     "xlsx": "^0.18.5"
   }
