@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reporte Ejecutivo QA - Reviewer Lifecycle</title>
+  <style>
+    :root { --bg:#f5f7fb; --card:#ffffff; --ink:#162032; --muted:#5e6c84; --ok:#0f9d58; --warn:#d97706; --bad:#dc2626; --line:#dbe3ef; }
+    body { margin:0; font-family: "Segoe UI", Tahoma, sans-serif; background:var(--bg); color:var(--ink); }
+    .wrap { max-width:1100px; margin:24px auto; padding:0 16px; }
+    .hero { background:linear-gradient(135deg,#0d3b66,#1e6091); color:white; border-radius:14px; padding:20px; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+    h1,h2 { margin:0 0 8px 0; }
+    h2 { margin-top:20px; font-size:20px; }
+    .kpi { font-size:28px; font-weight:700; }
+    .ok { color:var(--ok); }
+    .warn { color:var(--warn); }
+    .bad { color:var(--bad); }
+    table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+    th,td { border-bottom:1px solid var(--line); padding:10px; text-align:left; font-size:14px; }
+    th { background:#eef3fb; }
+    .pill { display:inline-block; border-radius:999px; padding:4px 10px; font-size:12px; font-weight:700; }
+    .pill-ok { background:#e7f7ee; color:#0f9d58; }
+    .pill-warn { background:#fff5e6; color:#d97706; }
+    .pill-bad { background:#fdecec; color:#dc2626; }
+    .foot { color:var(--muted); font-size:12px; margin-top:18px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>QA Executive Report - Reviewer Lifecycle</h1>
+      <div>Escenario: Tardy -> Approved -> Registered -> Paid</div>
+      <div>Fecha: 2026-08-25 | Ambiente: dev.quantify.quisit.net</div>
+    </section>
+
+    <section class="cards">
+      <article class="card">
+        <div>Estado general</div>
+        <div class="kpi warn">Blocked by Test Data</div>
+      </article>
+      <article class="card">
+        <div>Casos ejecutados</div>
+        <div class="kpi">1</div>
+      </article>
+      <article class="card">
+        <div>Evidencia UI de Paid</div>
+        <div class="kpi ok">Detectada</div>
+      </article>
+      <article class="card">
+        <div>Validación backend API</div>
+        <div class="kpi warn">Parcial</div>
+      </article>
+    </section>
+
+    <h2>Resumen Ejecutivo</h2>
+    <table>
+      <thead>
+        <tr><th>Area</th><th>Resultado</th><th>Detalle</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>UI Workflow</td>
+          <td><span class="pill pill-ok">Comportamiento confirmado</span></td>
+          <td>En una corrida previa de la misma sesión se observó transición hasta Paid y toast de confirmación Invoice marked as paid successfully.</td>
+        </tr>
+        <tr>
+          <td>Precondición de datos</td>
+          <td><span class="pill pill-bad">Falla actual</span></td>
+          <td>La corrida final no encontró facturas accionables para reviewer con filtros Submitted/Tardy (0 rows), por eso el caso se bloquea antes de ejecutar transiciones.</td>
+        </tr>
+        <tr>
+          <td>Backend checks</td>
+          <td><span class="pill pill-warn">Parcial</span></td>
+          <td>El spec actual valida mutaciones backend por respuestas HTTP de acciones UI. La lectura directa GET por API no es estable en este ambiente para esta sesión.</td>
+        </tr>
+        <tr>
+          <td>Riesgo</td>
+          <td><span class="pill pill-warn">Medio</span></td>
+          <td>Riesgo principal no funcional: inestabilidad de datos de prueba, no defecto confirmado del flujo reviewer.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Acciones Recomendadas Inmediatas</h2>
+    <table>
+      <thead><tr><th>Prioridad</th><th>Acción</th><th>Dueño sugerido</th></tr></thead>
+      <tbody>
+        <tr><td>Alta</td><td>Sembrar al menos 1 factura en estado Tardy para reviewer antes de cada corrida E2E.</td><td>QA Data / Backend</td></tr>
+        <tr><td>Alta</td><td>Crear endpoint o script de test-data para generar factura actionable sin depender de UI provider.</td><td>Backend</td></tr>
+        <tr><td>Media</td><td>Agregar smoke de disponibilidad de datos como pre-test gate en CI.</td><td>QA Automation</td></tr>
+      </tbody>
+    </table>
+
+    <p class="foot">Artefactos técnicos: playwright-report/index.html, tests/reviewer-tardy-lifecycle.spec.ts</p>
+  </div>
+</body>
+</html>

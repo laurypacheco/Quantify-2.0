@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard QA - Reviewer Lifecycle</title>
+  <style>
+    :root { --a:#0b132b; --b:#1c2541; --c:#3a506b; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --card:#ffffff; }
+    body { margin:0; background:radial-gradient(circle at 20% 10%, #e7efff, #f6f8fc 60%); font-family: "Trebuchet MS", Verdana, sans-serif; color:var(--a); }
+    .container { max-width:1200px; margin:20px auto; padding:0 16px; }
+    .grid { display:grid; gap:12px; grid-template-columns:repeat(12,1fr); }
+    .tile { background:var(--card); border:1px solid #d7dfef; border-radius:14px; padding:14px; box-shadow:0 8px 24px rgba(11,19,43,.06); }
+    .span-3 { grid-column:span 3; } .span-6 { grid-column:span 6; } .span-12 { grid-column:span 12; }
+    .value { font-size:30px; font-weight:800; }
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .small{font-size:12px;color:#5b6882}
+    .bar { height:10px; border-radius:8px; background:#e6edf9; overflow:hidden; }
+    .fill-ok{height:10px;background:var(--ok)} .fill-warn{height:10px;background:var(--warn)} .fill-bad{height:10px;background:var(--bad)}
+    ul{margin:8px 0 0 18px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="grid">
+      <div class="tile span-12">
+        <h2 style="margin:0">Dashboard QA - Reviewer Lifecycle</h2>
+        <div class="small">Escenario automatizado: Tardy -> Approved -> Registered -> Paid | Fecha: 2026-08-25</div>
+      </div>
+
+      <div class="tile span-3">
+        <div class="small">Run Status</div>
+        <div class="value warn">Blocked</div>
+        <div class="small">No hay facturas accionables en el último run</div>
+      </div>
+
+      <div class="tile span-3">
+        <div class="small">UI Coverage</div>
+        <div class="value ok">100%</div>
+        <div class="small">Flujo y selectores implementados</div>
+      </div>
+
+      <div class="tile span-3">
+        <div class="small">Backend Validation</div>
+        <div class="value warn">70%</div>
+        <div class="small">Mutations por response OK, dataset bloqueado</div>
+      </div>
+
+      <div class="tile span-3">
+        <div class="small">Data Readiness</div>
+        <div class="value bad">0 rows</div>
+        <div class="small">Submitted/Tardy = 0 en la corrida final</div>
+      </div>
+
+      <div class="tile span-6">
+        <h3 style="margin:0 0 8px 0">Métricas</h3>
+        <div class="small">Automatización completada</div>
+        <div class="bar"><div class="fill-ok" style="width:100%"></div></div>
+        <div class="small" style="margin-top:8px">Ejecución efectiva del caso de negocio</div>
+        <div class="bar"><div class="fill-warn" style="width:55%"></div></div>
+        <div class="small" style="margin-top:8px">Disponibilidad de datos de prueba</div>
+        <div class="bar"><div class="fill-bad" style="width:10%"></div></div>
+      </div>
+
+      <div class="tile span-6">
+        <h3 style="margin:0 0 8px 0">Hallazgos</h3>
+        <ul>
+          <li>La corrida anterior evidenció Paid en UI con toast de éxito.</li>
+          <li>La corrida final no pudo iniciar transición por falta de facturas Submitted/Tardy.</li>
+          <li>El bloqueo principal es de data setup, no de selectores ni de motor de automatización.</li>
+        </ul>
+      </div>
+
+      <div class="tile span-12">
+        <h3 style="margin:0 0 8px 0">Artefactos</h3>
+        <div class="small">Playwright report: playwright-report/index.html</div>
+        <div class="small">Spec usado: tests/reviewer-tardy-lifecycle.spec.ts</div>
+        <div class="small">Reporte ejecutivo: .workspace/reports/reviewer-lifecycle-executive-2026-08-25.html</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
